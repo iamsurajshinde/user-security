@@ -1,7 +1,9 @@
 package com.example.user.controller;
 
+import com.example.user.dto.LoginRequest;
 import com.example.user.dto.UserResponse;
 import com.example.user.model.User;
+import com.example.user.service.JwtService;
 import com.example.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,11 +17,19 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final JwtService jwtService;
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         User savedUser = userService.saveUser(user);
         return ResponseEntity.ok(toUserResponse(savedUser));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest userRequest) {
+        User user = userService.authenticate(userRequest.email(), userRequest.password());
+        String token = jwtService.generateToken(user);
+        return ResponseEntity.ok(token);
     }
 
     @GetMapping
