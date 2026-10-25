@@ -1,5 +1,6 @@
 package com.example.user.service;
 
+import com.example.user.config.PasswordEncoderConfig;
 import com.example.user.model.User;
 import com.example.user.repository.UserRepository;
 import org.slf4j.Logger;
@@ -8,6 +9,7 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -17,13 +19,14 @@ import java.util.regex.Pattern;
 public class UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
-
+    private final BCryptPasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$",
             Pattern.CASE_INSENSITIVE);
 
-    public UserService(UserRepository userRepository) {
+    public UserService(BCryptPasswordEncoder passwordEncoder, UserRepository userRepository) {
+        this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
     }
 
@@ -52,22 +55,22 @@ public class UserService {
     }
 */
 
-    /*public User authenticate(String email, String password) {
+    public User authenticate(String email, String password) {
         if (email == null || password == null) {
-            throw new InvalidCredentialsException();
+            throw new RuntimeException();
         }
 
         User user = getUserByEmail(email);
         if (user == null) {
-            throw new InvalidCredentialsException();
+            throw new RuntimeException();
         }
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new InvalidCredentialsException();
+            throw new RuntimeException();
         }
 
         return user;
-    }*/
+    }
 
     public User getUserByEmail(String email) {
         if (email == null || email.isBlank()) {
